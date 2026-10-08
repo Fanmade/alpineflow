@@ -6,6 +6,7 @@
 // with Alpine's reactive proxy model.
 // ============================================================================
 
+import type { FlowTranslations } from './translations';
 import type { EasingName } from '../animate/easing';
 import type { PathFunction } from '../animate/paths';
 import type { CollabConfig, CollabInstance } from '../collab/types';
@@ -1134,6 +1135,8 @@ export type SchemaNodeClassResolver = (
 ) => SchemaClassValue | SchemaNodeClassMap;
 
 export interface FlowCanvasConfig {
+  /** UI message overrides for this canvas. Missing keys fall back to English. */
+  translations?: FlowTranslations;
   nodes?: FlowNode[];
   edges?: FlowEdge[];
 

@@ -24,6 +24,7 @@
 //   </div>
 // ============================================================================
 
+import { translate } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import {
     lastInSet,
@@ -150,7 +151,7 @@ function stampRowDefaultUi(
     if (!row) {
         const empty = document.createElement('div');
         empty.setAttribute('data-schema-inspector-empty', '');
-        empty.textContent = 'No row selected.';
+        empty.textContent = translate(canvas._config?.translations, 'noRow');
         root.appendChild(empty);
         restoreStampFocus(root, captured);
         return;
@@ -162,7 +163,7 @@ function stampRowDefaultUi(
     if (!field) {
         const missing = document.createElement('div');
         missing.setAttribute('data-schema-inspector-empty', '');
-        missing.textContent = 'Selected row no longer exists.';
+        missing.textContent = translate(canvas._config?.translations, 'missingRow');
         root.appendChild(missing);
         restoreStampFocus(root, captured);
         return;
@@ -170,7 +171,7 @@ function stampRowDefaultUi(
 
     // Name
     const nameLabel = document.createElement('label');
-    nameLabel.textContent = 'name ';
+    nameLabel.textContent = translate(canvas._config?.translations, 'name') + ' ';
     const nameInput = document.createElement('input');
     nameInput.setAttribute('data-field', 'name');
     nameInput.value = String(field.name ?? '');
@@ -186,7 +187,7 @@ function stampRowDefaultUi(
 
     // Type
     const typeLabel = document.createElement('label');
-    typeLabel.textContent = 'type ';
+    typeLabel.textContent = translate(canvas._config?.translations, 'type') + ' ';
     const typeInput = document.createElement('input');
     typeInput.setAttribute('data-field', 'type');
     typeInput.value = String(field.type ?? '');
@@ -198,7 +199,7 @@ function stampRowDefaultUi(
 
     // Required
     const requiredLabel = document.createElement('label');
-    requiredLabel.textContent = 'required ';
+    requiredLabel.textContent = translate(canvas._config?.translations, 'required') + ' ';
     const requiredInput = document.createElement('input');
     requiredInput.type = 'checkbox';
     requiredInput.setAttribute('data-field', 'required');
@@ -213,7 +214,7 @@ function stampRowDefaultUi(
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.setAttribute('data-action', 'remove');
-    removeBtn.textContent = 'remove';
+    removeBtn.textContent = translate(canvas._config?.translations, 'remove');
     removeBtn.addEventListener('click', () => {
         canvas.removeField?.(row.nodeId, row.fieldName);
     });

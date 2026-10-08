@@ -20,6 +20,7 @@
 //   </div>
 // ============================================================================
 
+import { translate } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import {
     lastInSet,
@@ -120,14 +121,14 @@ function stampEdgeDefaultUi(host: HTMLElement, canvas: any, edge: any | null): v
     if (!edge) {
         const empty = document.createElement('div');
         empty.setAttribute('data-schema-inspector-empty', '');
-        empty.textContent = 'No edge selected.';
+        empty.textContent = translate(canvas._config?.translations, 'noEdge');
         root.appendChild(empty);
         restoreStampFocus(root, captured);
         return;
     }
 
     const labelWrap = document.createElement('label');
-    labelWrap.textContent = 'label ';
+    labelWrap.textContent = translate(canvas._config?.translations, 'label') + ' ';
     const labelInput = document.createElement('input');
     labelInput.setAttribute('data-field', 'label');
     labelInput.value = String(edge.label ?? '');
@@ -140,7 +141,7 @@ function stampEdgeDefaultUi(host: HTMLElement, canvas: any, edge: any | null): v
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.setAttribute('data-action', 'delete');
-    deleteBtn.textContent = 'delete';
+    deleteBtn.textContent = translate(canvas._config?.translations, 'delete');
     deleteBtn.addEventListener('click', () => {
         if (typeof canvas.removeEdges === 'function') {
             canvas.removeEdges([edge.id]);

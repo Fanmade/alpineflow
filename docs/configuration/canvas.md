@@ -65,3 +65,42 @@ Core options that control the canvas appearance and viewport behavior.
 - [Background](../canvas/background.md)
 - [Viewport](../canvas/viewport.md)
 - [Theming](../theming/css-variables.md)
+
+## Translations
+
+Pass a partial `translations` dictionary to `flowCanvas`. Each canvas manages its own messages, omitted keys retain their English defaults.
+No global locale or extra translation library is required.
+
+```js
+import de from '@getartisanflow/alpineflow/locales/de.json';
+
+Alpine.data('germanDiagram', () => ({
+    config: {
+        controls: true,
+        translations: { ...de, zoomIn: 'Näher heran' },
+    },
+}));
+```
+
+```html
+<div x-data="germanDiagram">
+    <div x-data="flowCanvas(config)" class="flow-container"></div>
+</div>
+```
+
+`locales/en.json` and the `FlowTranslations` type expose all supported keys.
+The JSON dictionaries in `locales/` are the single source for engine messages;
+the build copies them to `dist/locales/` for npm and downstream PHP consumers.
+Messages cover controls, loading, selection mode, accessible node/edge/handle
+labels, screen reader announcements, workflow node defaults and schema inspector
+UI. Developer diagnostics and condition expressions remain technical text.
+
+Messages are plain text. Keep placeholders such as `:label`, `:source`, `:target`
+and `:count` in your translations; values are substituted literally without
+interpreting HTML. Selection announcements have separate `oneNode` / `manyNodes`
+and `oneEdge` / `manyEdges` messages. For more involved grammatical rules, use
+the existing `announcements.formatMessage` callback.
+
+Explicit `ariaLabel`, `loadingText`, node labels and custom announcement formatters
+keep precedence. Messages are configured at initialization; recreate the canvas
+to change its language.

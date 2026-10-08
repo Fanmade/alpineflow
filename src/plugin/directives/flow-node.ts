@@ -8,6 +8,7 @@
 // Usage: <div x-flow-node="node">...</div>
 // ============================================================================
 
+import { translate } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import { createDrag, type DragInstance } from '../../core/drag';
 import type { FlowNode, FlowEdge, Viewport } from '../../core/types';
@@ -459,7 +460,7 @@ export function registerFlowNodeDirective(Alpine: Alpine) {
         if (focusable) {
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', node.ariaRole ?? 'group');
-          el.setAttribute('aria-label', node.ariaLabel ?? (node.data?.label ? `Node: ${node.data.label}` : `Node ${node.id}`));
+          el.setAttribute('aria-label', node.ariaLabel ?? (node.data?.label ? translate(canvas._config?.translations, 'nodeLabel', { label: node.data.label }) : translate(canvas._config?.translations, 'nodeId', { id: node.id })));
         } else {
           el.removeAttribute('tabindex');
           el.removeAttribute('role');

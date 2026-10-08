@@ -67,6 +67,7 @@ import { createColorMode, type ColorModeHandle } from '../../core/color-mode';
 import type { CollabConfig } from '../../collab/types';
 import { collabStore } from '../../collab/store';
 import { getAddon, getRegistry } from '../../core/registry';
+import { translate } from '../../core/translations';
 import { FlowAnnouncer } from '../../core/announcer';
 import { ComputeEngine } from '../../core/compute';
 import { registerWireEvents, registerWireCommands, registerCustomWireCommands } from '../../core/wire-bridge';
@@ -173,7 +174,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
     _userLoading: (config.loading ?? false) as boolean,
 
     /** Custom text for the default loading indicator */
-    _loadingText: (config.loadingText ?? 'Loading\u2026') as string,
+    _loadingText: (config.loadingText ?? translate(config.translations, 'loading')) as string,
 
     /** Auto-injected loading overlay element (when config.loading: true and no directive) */
     _autoLoadingOverlay: null as HTMLElement | null,
@@ -1224,7 +1225,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
         this._container.setAttribute('data-fit-view', '');
       }
       this._container.setAttribute('role', 'application');
-      this._container.setAttribute('aria-label', config.ariaLabel ?? 'Flow diagram');
+      this._container.setAttribute('aria-label', config.ariaLabel ?? translate(config.translations, 'diagram'));
       this._containerStyles = getComputedStyle(this._container);
       this._animator = new Animator(engine);
 
@@ -1298,7 +1299,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
         const formatFn = typeof config.announcements === 'object'
           ? config.announcements.formatMessage
           : undefined;
-        this._announcer = new FlowAnnouncer(this._container, formatFn);
+        this._announcer = new FlowAnnouncer(this._container, formatFn, config.translations);
       }
     },
 
@@ -1682,7 +1683,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
 
         const indicator = document.createElement('div');
         indicator.className = 'flow-touch-selection-mode-indicator';
-        indicator.textContent = 'Selection Mode \u2014 tap with two fingers to exit';
+        indicator.textContent = translate(config.translations, 'selectionMode');
         container.appendChild(indicator);
 
         this._touchSelectionCleanup = () => {
@@ -1893,6 +1894,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
 
         const isExternal = controlsContainer !== this._container;
         this._controls = createControlsPanel(controlsContainer!, {
+          translations: config.translations,
           position: config.controlsPosition ?? 'bottom-left',
           orientation: config.controlsOrientation ?? 'vertical',
           external: isExternal,

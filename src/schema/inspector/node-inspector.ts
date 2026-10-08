@@ -32,6 +32,7 @@
 // Consumer themes style via CSS. This directive writes no styles of its own.
 // ============================================================================
 
+import { translate } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import {
     lastInSet,
@@ -154,7 +155,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
     if (!node) {
         const empty = document.createElement('div');
         empty.setAttribute('data-schema-inspector-empty', '');
-        empty.textContent = 'No node selected.';
+        empty.textContent = translate(canvas._config?.translations, 'noNode');
         root.appendChild(empty);
         restoreStampFocus(root, captured);
         return;
@@ -187,7 +188,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.setAttribute('data-action', 'remove');
-        removeBtn.textContent = 'remove';
+        removeBtn.textContent = translate(canvas._config?.translations, 'remove');
         removeBtn.addEventListener('click', () => {
             canvas.removeField?.(node.id, f.name);
         });
@@ -202,7 +203,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
 
     const nameInput = document.createElement('input');
     nameInput.setAttribute('data-field', 'name');
-    nameInput.placeholder = 'field name';
+    nameInput.placeholder = translate(canvas._config?.translations, 'fieldName');
     form.appendChild(nameInput);
 
     const registry = Array.isArray(canvas._config?.fieldTypeRegistry)
@@ -224,7 +225,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
     } else {
         const input = document.createElement('input');
         input.setAttribute('data-field', 'type');
-        input.placeholder = 'type';
+        input.placeholder = translate(canvas._config?.translations, 'type');
         input.value = 'text';
         typeInput = input;
     }
@@ -232,7 +233,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
 
     const addBtn = document.createElement('button');
     addBtn.type = 'submit';
-    addBtn.textContent = 'add';
+    addBtn.textContent = translate(canvas._config?.translations, 'add');
     form.appendChild(addBtn);
 
     form.addEventListener('submit', (e) => {
