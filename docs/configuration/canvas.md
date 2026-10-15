@@ -56,7 +56,9 @@ Core options that control the canvas appearance and viewport behavior.
 | `background` | `string \| BackgroundLayer[]` | `'dots'` | Background pattern: `'dots'`, `'lines'`, `'cross'`, `'none'`, or array of layers. |
 | `backgroundGap` | `number` | `20` | Grid spacing in pixels. Overrides `--flow-bg-pattern-gap`. |
 | `patternColor` | `string` | — | Pattern color. Overrides `--flow-bg-pattern-color`. Supports `rgba()`. |
-| `ariaLabel` | `string` | `'Flow diagram'` | ARIA label for the container. |
+| `ariaLabel` | `string` | `canvas.label` message | ARIA label for the container. |
+| `translations` | `FlowTranslations` | — | Partial message overrides; missing keys fall back to English. See [Translations](#translations). |
+| `locale` | `string` | `<html lang>`, then `'en'` | Locale for plural forms in `translations`. Laravel-style `pt_BR` is accepted. |
 | `colorMode` | `'light' \| 'dark' \| 'system'` | — | Color mode management. `'system'` tracks OS preference. Adds/removes `.dark` class. |
 | `debug` | `boolean` | `false` | Enable debug logging to console. |
 
@@ -69,7 +71,7 @@ Core options that control the canvas appearance and viewport behavior.
 ## Translations
 
 Pass a partial `translations` dictionary to `flowCanvas`. Each canvas manages its own messages, omitted keys retain their English defaults.
-No global locale or extra translation library is required.
+No extra translation library is required.
 
 ```js
 import de from '@getartisanflow/alpineflow/locales/de.json';
@@ -77,7 +79,8 @@ import de from '@getartisanflow/alpineflow/locales/de.json';
 Alpine.data('germanDiagram', () => ({
     config: {
         controls: true,
-        translations: { ...de, zoomIn: 'Näher heran' },
+        locale: 'de',
+        translations: { ...de, 'controls.zoomIn': 'Näher heran' },
     },
 }));
 ```
@@ -91,15 +94,36 @@ Alpine.data('germanDiagram', () => ({
 `locales/en.json` and the `FlowTranslations` type expose all supported keys.
 The JSON dictionaries in `locales/` are the single source for engine messages;
 the build copies them to `dist/locales/` for npm and downstream PHP consumers.
-Messages cover controls, loading, selection mode, accessible node/edge/handle
-labels, screen reader announcements, workflow node defaults and schema inspector
-UI. Developer diagnostics and condition expressions remain technical text.
+
+Keys are flat dotted strings grouped by where the message appears:
+
+| Prefix | Covers |
+|--------|--------|
+| `controls.*` | Controls panel buttons and its ARIA label. |
+| `canvas.*` | Container label, loading text, selection-mode indicator. |
+| `a11y.*` | Accessible names of nodes, edges, handles and the control-point hint. |
+| `announce.*` | Screen reader announcements. |
+| `workflow.*` | Default labels of workflow nodes. |
+| `schema.inspector.*` | Schema inspector UI. |
+
+Developer diagnostics and condition expressions remain technical text.
 
 Messages are plain text. Keep placeholders such as `:label`, `:source`, `:target`
 and `:count` in your translations; values are substituted literally without
-interpreting HTML. Selection announcements have separate `oneNode` / `manyNodes`
-and `oneEdge` / `manyEdges` messages. For more involved grammatical rules, use
-the existing `announcements.formatMessage` callback.
+interpreting HTML.
+
+Messages that carry a `:count` exist once per CLDR plural category, suffixed
+`_zero`, `_one`, `_two`, `_few`, `_many` or `_other` (i18next's convention), for
+example `announce.nodesSelected_one` / `announce.nodesSelected_other`. The form is
+picked with `Intl.PluralRules` for the canvas `locale`, so French treats `0` as
+singular and Polish uses `_few` / `_many`. Provide the categories your language
+needs; `_other` is used when a category is missing, and English fallbacks always
+follow English plural rules. For grammar beyond plurals, use the existing
+`announcements.formatMessage` callback.
+
+`locale` defaults to `document.documentElement.lang`, which Laravel layouts set
+from `app()->getLocale()`. Underscores are normalised (`pt_BR` → `pt-BR`) and an
+invalid tag falls back to `en`.
 
 Explicit `ariaLabel`, `loadingText`, node labels and custom announcement formatters
 keep precedence. Messages are configured at initialization; recreate the canvas

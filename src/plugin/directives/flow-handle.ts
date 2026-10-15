@@ -1879,7 +1879,7 @@ export function registerFlowHandleDirective(Alpine: Alpine) {
         if (initCanvas?._config?.keyboardConnect) {
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', 'button');
-          el.setAttribute('aria-label', translate(initCanvas._config?.translations, type === 'source' ? 'sourceHandle' : 'targetHandle', { id: handleId }));
+          el.setAttribute('aria-label', translate(initCanvas._config?.translations, type === 'source' ? 'a11y.sourceHandle' : 'a11y.targetHandle', { id: handleId }));
 
           const clearPending = (canvas: { _pendingKeyboardConnect?: PendingKeyboardConnect | null } | null | undefined) => {
             const prev = canvas?._pendingKeyboardConnect;

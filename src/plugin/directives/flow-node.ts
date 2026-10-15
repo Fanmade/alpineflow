@@ -460,7 +460,7 @@ export function registerFlowNodeDirective(Alpine: Alpine) {
         if (focusable) {
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', node.ariaRole ?? 'group');
-          el.setAttribute('aria-label', node.ariaLabel ?? (node.data?.label ? translate(canvas._config?.translations, 'nodeLabel', { label: node.data.label }) : translate(canvas._config?.translations, 'nodeId', { id: node.id })));
+          el.setAttribute('aria-label', node.ariaLabel ?? (node.data?.label ? translate(canvas._config?.translations, 'a11y.nodeLabel', { label: node.data.label }) : translate(canvas._config?.translations, 'a11y.nodeId', { id: node.id })));
         } else {
           el.removeAttribute('tabindex');
           el.removeAttribute('role');

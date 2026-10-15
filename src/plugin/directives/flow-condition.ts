@@ -92,7 +92,7 @@ export function registerFlowConditionDirective(Alpine: Alpine) {
 
             clearChildren(host);
 
-            const label = typeof data.label === 'string' && data.label ? data.label : translate(translations, 'condition');
+            const label = typeof data.label === 'string' && data.label ? data.label : translate(translations, 'workflow.condition');
             const header = document.createElement('div');
             header.className = 'flow-condition-header';
             header.textContent = label;
@@ -105,7 +105,7 @@ export function registerFlowConditionDirective(Alpine: Alpine) {
             } else if (typeof data.evaluate === 'function') {
                 body.textContent = typeof data.evaluateLabel === 'string' && data.evaluateLabel
                     ? data.evaluateLabel
-                    : translate(translations, 'customEvaluator');
+                    : translate(translations, 'workflow.customEvaluator');
             } else {
                 body.textContent = '';
             }

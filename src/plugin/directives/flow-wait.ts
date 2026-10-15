@@ -73,7 +73,7 @@ export function registerFlowWaitDirective(Alpine: Alpine) {
             const data = node?.data;
             if (!data) return;
 
-            const label = typeof data.label === 'string' && data.label ? data.label : translate(translations, 'wait');
+            const label = typeof data.label === 'string' && data.label ? data.label : translate(translations, 'workflow.wait');
             const icon = typeof data.icon === 'string' && data.icon ? data.icon : '';
             const ms = typeof data.durationMs === 'number' ? data.durationMs : NaN;
 

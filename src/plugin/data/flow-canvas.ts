@@ -174,7 +174,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
     _userLoading: (config.loading ?? false) as boolean,
 
     /** Custom text for the default loading indicator */
-    _loadingText: (config.loadingText ?? translate(config.translations, 'loading')) as string,
+    _loadingText: (config.loadingText ?? translate(config.translations, 'canvas.loading')) as string,
 
     /** Auto-injected loading overlay element (when config.loading: true and no directive) */
     _autoLoadingOverlay: null as HTMLElement | null,
@@ -1225,7 +1225,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
         this._container.setAttribute('data-fit-view', '');
       }
       this._container.setAttribute('role', 'application');
-      this._container.setAttribute('aria-label', config.ariaLabel ?? translate(config.translations, 'diagram'));
+      this._container.setAttribute('aria-label', config.ariaLabel ?? translate(config.translations, 'canvas.label'));
       this._containerStyles = getComputedStyle(this._container);
       this._animator = new Animator(engine);
 
@@ -1299,7 +1299,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
         const formatFn = typeof config.announcements === 'object'
           ? config.announcements.formatMessage
           : undefined;
-        this._announcer = new FlowAnnouncer(this._container, formatFn, config.translations);
+        this._announcer = new FlowAnnouncer(this._container, formatFn, config.translations, config.locale);
       }
     },
 
@@ -1683,7 +1683,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
 
         const indicator = document.createElement('div');
         indicator.className = 'flow-touch-selection-mode-indicator';
-        indicator.textContent = translate(config.translations, 'selectionMode');
+        indicator.textContent = translate(config.translations, 'canvas.selectionMode');
         container.appendChild(indicator);
 
         this._touchSelectionCleanup = () => {

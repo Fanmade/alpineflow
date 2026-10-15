@@ -20,3 +20,20 @@ it('passes canvas translations to controls, loading and announcements', () => {
   canvas._controls.destroy();
   canvas._announcer.destroy();
 });
+
+it('pluralises announcements with the configured canvas locale', () => {
+  const canvas = realCanvas({
+    locale: 'fr',
+    translations: {
+      'announce.connectionsRemoved_one': ':count connexion supprimée',
+      'announce.connectionsRemoved_other': ':count connexions supprimées',
+    },
+  });
+  canvas._container = document.createElement('div');
+  canvas._initAnnouncer();
+  canvas._announcer.handleEvent('edges-change', { type: 'remove', edges: [] });
+
+  expect(canvas._container.querySelector('[role="status"]')?.textContent).toBe('0 connexion supprimée');
+
+  canvas._announcer.destroy();
+});

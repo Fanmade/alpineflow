@@ -5,7 +5,7 @@
  * flow diagram changes. Hooks into _emit() via handleEvent().
  */
 
-import { translate, type FlowTranslations } from './translations';
+import { translate, type FlowTranslations, type TranslationKey } from './translations';
 
 export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) => string | null;
 
@@ -13,17 +13,17 @@ export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) 
  * Default event-to-announcement formatter.
  * Returns null for events that should not be announced.
  */
-export function defaultFormatAnnouncement(event: string, detail: Record<string, any>, translations?: FlowTranslations): string | null {
-  const t = (key: keyof FlowTranslations, values?: Record<string, string | number>) => translate(translations, key, values);
+export function defaultFormatAnnouncement(event: string, detail: Record<string, any>, translations?: FlowTranslations, locale?: string): string | null {
+  const t = (key: TranslationKey, values?: Record<string, string | number>) => translate(translations, key, values, locale);
   switch (event) {
     case 'nodes-change': {
       const nodes = detail.nodes ?? [];
       const label = nodes.length === 1 ? (nodes[0].data?.label || nodes[0].id) : null;
       if (detail.type === 'add') {
-        return label ? t('nodeAdded', { label }) : t('nodesAdded', { count: nodes.length });
+        return label ? t('announce.nodeAdded', { label }) : t('announce.nodesAdded', { count: nodes.length });
       }
       if (detail.type === 'remove') {
-        return label ? t('nodeRemoved', { label }) : t('nodesRemoved', { count: nodes.length });
+        return label ? t('announce.nodeRemoved', { label }) : t('announce.nodesRemoved', { count: nodes.length });
       }
       return null;
     }
@@ -32,15 +32,15 @@ export function defaultFormatAnnouncement(event: string, detail: Record<string, 
       const edges = detail.edges ?? [];
       if (detail.type === 'add') {
         if (edges.length === 1) {
-          return t('connected', { source: edges[0].source, target: edges[0].target });
+          return t('announce.connected', { source: edges[0].source, target: edges[0].target });
         }
-        return t('connectionsAdded', { count: edges.length });
+        return t('announce.connectionsAdded', { count: edges.length });
       }
       if (detail.type === 'remove') {
         if (edges.length === 1 && edges[0].source && edges[0].target) {
-          return t('disconnected', { source: edges[0].source, target: edges[0].target });
+          return t('announce.disconnected', { source: edges[0].source, target: edges[0].target });
         }
-        return t('connectionsRemoved', { count: edges.length });
+        return t('announce.connectionsRemoved', { count: edges.length });
       }
       return null;
     }
@@ -49,28 +49,28 @@ export function defaultFormatAnnouncement(event: string, detail: Record<string, 
       const nodeCount = detail.nodes?.length ?? 0;
       const edgeCount = detail.edges?.length ?? 0;
       if (nodeCount === 0 && edgeCount === 0) {
-        return t('selectionCleared');
+        return t('announce.selectionCleared');
       }
       const parts: string[] = [];
-      if (nodeCount > 0) parts.push(t(nodeCount === 1 ? 'oneNode' : 'manyNodes', { count: nodeCount }));
-      if (edgeCount > 0) parts.push(t(edgeCount === 1 ? 'oneEdge' : 'manyEdges', { count: edgeCount }));
-      return t('selected', { items: parts.length === 2 ? t('selectionJoin', { nodes: parts[0], edges: parts[1] }) : parts[0] });
+      if (nodeCount > 0) parts.push(t('announce.nodesSelected', { count: nodeCount }));
+      if (edgeCount > 0) parts.push(t('announce.edgesSelected', { count: edgeCount }));
+      return t('announce.selected', { items: parts.length === 2 ? t('announce.selectionJoin', { nodes: parts[0], edges: parts[1] }) : parts[0] });
     }
 
     case 'viewport-move-end': {
       const zoom = detail.viewport?.zoom ?? 1;
-      return t('viewportZoom', { percent: Math.round(zoom * 100) });
+      return t('announce.viewportZoom', { percent: Math.round(zoom * 100) });
     }
 
     case 'fit-view':
-      return t('viewFitted');
+      return t('announce.viewFitted');
 
     case 'node-reparent': {
-      const name = detail.node?.data?.label || detail.node?.id || t('node');
+      const name = detail.node?.data?.label || detail.node?.id || t('announce.node');
       if (detail.newParentId) {
-        return t('reparented', { name, parent: detail.newParentId });
+        return t('announce.reparented', { name, parent: detail.newParentId });
       }
-      return t('detached', { name, parent: detail.oldParentId });
+      return t('announce.detached', { name, parent: detail.oldParentId });
     }
 
     default:
@@ -85,8 +85,8 @@ export class FlowAnnouncer {
   private _clearTimer: ReturnType<typeof setTimeout> | null = null;
   private _formatMessage: FormatAnnouncementFn;
 
-  constructor(container: HTMLElement, formatMessage?: FormatAnnouncementFn, translations?: FlowTranslations) {
-    this._formatMessage = formatMessage ?? ((event, detail) => defaultFormatAnnouncement(event, detail, translations));
+  constructor(container: HTMLElement, formatMessage?: FormatAnnouncementFn, translations?: FlowTranslations, locale?: string) {
+    this._formatMessage = formatMessage ?? ((event, detail) => defaultFormatAnnouncement(event, detail, translations, locale));
 
     this._el = document.createElement('div');
     this._el.setAttribute('aria-live', 'polite');

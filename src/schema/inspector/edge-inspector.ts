@@ -121,14 +121,14 @@ function stampEdgeDefaultUi(host: HTMLElement, canvas: any, edge: any | null): v
     if (!edge) {
         const empty = document.createElement('div');
         empty.setAttribute('data-schema-inspector-empty', '');
-        empty.textContent = translate(canvas._config?.translations, 'noEdge');
+        empty.textContent = translate(canvas._config?.translations, 'schema.inspector.noEdge');
         root.appendChild(empty);
         restoreStampFocus(root, captured);
         return;
     }
 
     const labelWrap = document.createElement('label');
-    labelWrap.textContent = translate(canvas._config?.translations, 'label') + ' ';
+    labelWrap.textContent = translate(canvas._config?.translations, 'schema.inspector.label') + ' ';
     const labelInput = document.createElement('input');
     labelInput.setAttribute('data-field', 'label');
     labelInput.value = String(edge.label ?? '');
@@ -141,7 +141,7 @@ function stampEdgeDefaultUi(host: HTMLElement, canvas: any, edge: any | null): v
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.setAttribute('data-action', 'delete');
-    deleteBtn.textContent = translate(canvas._config?.translations, 'delete');
+    deleteBtn.textContent = translate(canvas._config?.translations, 'schema.inspector.delete');
     deleteBtn.addEventListener('click', () => {
         if (typeof canvas.removeEdges === 'function') {
             canvas.removeEdges([edge.id]);

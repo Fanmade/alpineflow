@@ -1137,6 +1137,11 @@ export type SchemaNodeClassResolver = (
 export interface FlowCanvasConfig {
   /** UI message overrides for this canvas. Missing keys fall back to English. */
   translations?: FlowTranslations;
+  /**
+   * BCP 47 locale used to pick plural forms (`_one`, `_few`, …) from `translations`.
+   * Laravel-style `pt_BR` is accepted. Default: `document.documentElement.lang`, then `en`.
+   */
+  locale?: string;
   nodes?: FlowNode[];
   edges?: FlowEdge[];
 
