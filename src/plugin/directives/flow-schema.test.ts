@@ -5,7 +5,6 @@ import { registerFlowSchemaDirective } from './flow-schema';
 import { registerFlowHandleDirective } from './flow-handle';
 import { registerFlowNodeDirective } from './flow-node';
 import type { FlowCanvasConfig } from '../../core/types';
-import { createTranslator } from '../../core/translations';
 
 /**
  * Clear a DOM node without using innerHTML (XSS-safe pattern).
@@ -619,7 +618,6 @@ describe('x-flow-schema directive', () => {
       (window as any).__schemaStampCanvas = () => ({
         viewport: { x: 0, y: 0, zoom: 1 },
         _schemaMetrics: null,
-        t: createTranslator(),
         _config: {},
         _nodeMap: new Map(),
         _nodeElements: new Map(),
@@ -671,7 +669,6 @@ describe('x-flow-schema directive', () => {
       (window as any).__schemaStampCanvasReversed = () => ({
         viewport: { x: 0, y: 0, zoom: 1 },
         _schemaMetrics: null,
-        t: createTranslator(),
         _config: {},
         _nodeMap: new Map(),
         _nodeElements: new Map(),
@@ -972,7 +969,6 @@ describe('x-flow-schema directive', () => {
       (window as any).__decoratorScope = () => ({
         _schemaMetrics: null,
         viewport: { zoom: 1 },
-        t: createTranslator(),
         _config: config,
         node: { id: 't', data },
       });

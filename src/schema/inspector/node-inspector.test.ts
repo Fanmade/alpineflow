@@ -8,7 +8,6 @@ import Alpine from 'alpinejs';
 import registerSchemaAddon from '../index';
 import { registerNodeInspectorDirective } from './node-inspector';
 import { _resetRegistry } from '../../core/registry';
-import { createTranslator } from '../../core/translations';
 
 function clearChildren(el: HTMLElement): void {
     while (el.firstChild) {
@@ -56,7 +55,6 @@ function mount(options: MountOptions = {}) {
     const fieldTypeRegistry = options.fieldTypeRegistry;
 
     Alpine.data('canvas', () => ({
-        t: createTranslator(),
         _config: fieldTypeRegistry !== undefined ? { fieldTypeRegistry } : {},
         nodes: [
             {

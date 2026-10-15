@@ -5,7 +5,6 @@ import { registerFlowHandleDirective } from './flow-handle';
 import { installHandleDelegation } from '../handle-delegation';
 import * as handleIndexModule from '../handle-index';
 import type { FlowEdge } from '../../core/types';
-import { createTranslator } from '../../core/translations';
 
 // jsdom doesn't implement CSS.escape — minimal polyfill for simple IDs
 beforeAll(() => {
@@ -72,7 +71,6 @@ function mount(opts: MountOptions = {}) {
     _pendingReconnection: null as any,
     _connectValidating: false,
     _animationLocked: false,
-    t: createTranslator(),
     _config: {
       keyboardConnect: opts.keyboardConnect,
       preventCycles: opts.preventCycles,
@@ -329,7 +327,6 @@ describe('keyboard drag-to-connect: Escape cancels pending state', () => {
       _pendingReconnection: null as any,
       _connectValidating: false,
       _animationLocked: false,
-      t: createTranslator(),
       _config: { keyboardConnect: true },
       _container: host,
       _announcer: null,

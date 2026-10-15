@@ -6,7 +6,7 @@
 // with Alpine's reactive proxy model.
 // ============================================================================
 
-import type { FlowTranslations, TranslationKey } from './translations';
+import type { FlowTranslations, TranslationKey, Translator } from './translations';
 import type { EasingName } from '../animate/easing';
 import type { PathFunction } from '../animate/paths';
 import type { CollabConfig, CollabInstance } from '../collab/types';
@@ -1458,7 +1458,7 @@ export interface FlowCanvasConfig {
   /** Screen reader announcements. true (default) = on, false = off,
    *  or object with formatMessage callback for custom messages. */
   announcements?: boolean | {
-    formatMessage?: (event: string, detail: Record<string, any>) => string | null;
+    formatMessage?: (event: string, detail: Record<string, any>, t: Translator) => string | null;
   };
 
   /** Compute mode. 'manual' (default) = explicit $flow.compute() calls,

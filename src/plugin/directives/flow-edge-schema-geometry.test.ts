@@ -4,7 +4,6 @@ import Alpine from 'alpinejs';
 import { registerFlowEdgeDirective } from './flow-edge';
 import { registerFlowHandleDirective } from './flow-handle';
 import { registerFlowSchemaDirective } from './flow-schema';
-import { createTranslator } from '../../core/translations';
 
 // ============================================================================
 // Schema handle geometry — state-derived endpoints vs the DOM oracle (Task G3)
@@ -327,7 +326,6 @@ function mount(opts: MountOptions) {
     _id: 'parity-canvas',
     _layoutAnimTick: 0,
     _zoomLevel: 'close' as const,
-    t: createTranslator(),
     _config: { ...(opts.config ?? {}) } as Record<string, unknown>,
     _shapeRegistry: undefined as unknown,
     _nodeMap: new Map<string, FixtureNode>(),

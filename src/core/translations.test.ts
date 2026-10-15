@@ -44,6 +44,11 @@ describe('translations', () => {
     expect(createTranslator(de)('a11y.nodeId', { id: 'n', count: 0 })).toBe('Knoten n');
   });
 
+  it('falls back to the _other form when a plural-only key is requested without a count', () => {
+    expect(createTranslator()('announce.nodesSelected')).toBe(':count nodes');
+    expect(createTranslator({ 'announce.nodesSelected_other': 'Knoten' })('announce.nodesSelected')).toBe('Knoten');
+  });
+
   it('validates every locale file against the English keys and placeholders', () => {
     const files = import.meta.glob<Record<string, unknown>>('../../locales/*.json', { eager: true, import: 'default' });
     const placeholders = (text: string) => [...text.matchAll(/:([a-zA-Z]+)/g)].map((m) => m[1]).sort();
@@ -193,6 +198,20 @@ describe('translations', () => {
     expect(defaultFormatAnnouncement('selection-change', { nodes: [] , edges: ['e'] }, createTranslator({}, 'fr'))).toBe('1 edge selected');
     expect(defaultFormatAnnouncement('nodes-change', { type: 'remove', nodes: [] }, createTranslator(french, 'fr'))).toBe('Removed 0 nodes');
     expect(defaultFormatAnnouncement('selection-change', { nodes: ['a', 'b'] }, createTranslator(french, 'fr'))).toBe('2 nœuds selected');
+  });
+
+  it('hands the canvas translator to custom announcement formatters', () => {
+    const container = document.createElement('div');
+    const announcer = new FlowAnnouncer(
+      container,
+      (event, detail, t) => (event === 'fit-view' ? t('announce.viewFitted') : defaultFormatAnnouncement(event, detail, t)),
+      createTranslator(de),
+    );
+    announcer.handleEvent('fit-view', {});
+    expect(container.textContent).toBe('Ansicht an Inhalt angepasst');
+    announcer.handleEvent('selection-change', {});
+    expect(container.textContent).toBe('Auswahl aufgehoben');
+    announcer.destroy();
   });
 
   it('preserves custom announcement formatters', () => {

@@ -7,7 +7,12 @@
 
 import { englishTranslator, type Translator } from './translations';
 
-export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) => string | null;
+/**
+ * Custom announcement formatter. Receives the canvas translator as third
+ * argument so it can localise its own strings or delegate to
+ * {@link defaultFormatAnnouncement} for events it does not handle.
+ */
+export type FormatAnnouncementFn = (event: string, detail: Record<string, any>, t: Translator) => string | null;
 
 /**
  * Default event-to-announcement formatter.
@@ -83,9 +88,11 @@ export class FlowAnnouncer {
   private _el: HTMLDivElement;
   private _clearTimer: ReturnType<typeof setTimeout> | null = null;
   private _formatMessage: FormatAnnouncementFn;
+  private _t: Translator;
 
-  constructor(container: HTMLElement, formatMessage?: FormatAnnouncementFn, t?: Translator) {
-    this._formatMessage = formatMessage ?? ((event, detail) => defaultFormatAnnouncement(event, detail, t));
+  constructor(container: HTMLElement, formatMessage?: FormatAnnouncementFn, t: Translator = englishTranslator) {
+    this._t = t;
+    this._formatMessage = formatMessage ?? defaultFormatAnnouncement;
 
     this._el = document.createElement('div');
     this._el.setAttribute('aria-live', 'polite');
@@ -117,7 +124,7 @@ export class FlowAnnouncer {
   }
 
   handleEvent(event: string, detail: Record<string, any>): void {
-    const message = this._formatMessage(event, detail);
+    const message = this._formatMessage(event, detail, this._t);
     if (message) this.announce(message);
   }
 

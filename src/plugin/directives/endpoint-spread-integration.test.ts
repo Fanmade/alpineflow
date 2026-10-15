@@ -16,7 +16,6 @@ import { registerFlowEdgeDirective } from './flow-edge';
 import { registerFlowHandleDirective } from './flow-handle';
 import { registerFlowSchemaDirective } from './flow-schema';
 import type { EndpointSpreadGrouping } from '../../core/types';
-import { createTranslator } from '../../core/translations';
 
 if (typeof globalThis.CSS === 'undefined') {
   (globalThis as unknown as { CSS: Partial<typeof CSS> }).CSS = {};
@@ -210,7 +209,6 @@ function mount(opts: MountOptions) {
     _id: 'spread-canvas',
     _layoutAnimTick: 0,
     _zoomLevel: 'close' as const,
-    t: createTranslator(),
     _config: { ...(opts.config ?? {}) } as Record<string, unknown>,
     _shapeRegistry: undefined as unknown,
     _nodeMap: new Map<string, FixtureNode>(),

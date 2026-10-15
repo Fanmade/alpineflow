@@ -116,7 +116,7 @@ templates and toolbars can reuse them via `$flow`:
 
 ```html
 <button @click="$flow.zoomIn()" :title="$flow.t('controls.zoomIn')">+</button>
-<span x-text="$flow.t('announce.nodesSelected', { count: $flow.selectedNodes.length })"></span>
+<span x-text="$flow.t('announce.nodesSelected', { count: $flow.selectedNodes.size })"></span>
 ```
 
 Messages that carry a `:count` exist once per CLDR plural category, suffixed
@@ -126,7 +126,9 @@ picked with `Intl.PluralRules` for the canvas `locale`, so French treats `0` as
 singular and Polish uses `_few` / `_many`. Provide the categories your language
 needs; `_other` is used when a category is missing, and English fallbacks always
 follow English plural rules. For grammar beyond plurals, use the existing
-`announcements.formatMessage` callback.
+`announcements.formatMessage` callback; it receives the canvas translator as
+third argument, so it can delegate unhandled events to the default formatter
+without losing translations.
 
 `locale` defaults to `document.documentElement.lang`, which Laravel layouts set
 from `app()->getLocale()`. Underscores are normalised (`pt_BR` → `pt-BR`) and an

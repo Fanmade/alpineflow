@@ -186,10 +186,13 @@ function usable(value: unknown): string | undefined {
 }
 
 function pickMessage(table: MessageTable, key: string, count: number | undefined, rules: Intl.PluralRules): string | undefined {
-  if (count === undefined) return usable(table[key]);
-  // A `count` value on a message without plural forms still resolves the plain key.
+  // Without a count, a plural-only key still yields its `_other` form rather than the raw key;
+  // with a count, a message without plural forms still resolves the plain key.
+  if (count === undefined) return usable(table[key]) ?? usable(table[`${key}_other`]);
   return usable(table[`${key}_${rules.select(count)}`]) ?? usable(table[`${key}_other`]) ?? usable(table[key]);
 }
+
+const placeholderPatternCache = new Map<string, RegExp>();
 
 /**
  * Substitute `:name` placeholders with the given values, longest name first
@@ -199,7 +202,13 @@ function pickMessage(table: MessageTable, key: string, count: number | undefined
 function substitute(message: string, values: Record<string, string | number>): string {
   const names = Object.keys(values).sort((a, b) => b.length - a.length);
   if (names.length === 0) return message;
-  const pattern = new RegExp(`:(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g');
+  // Call sites use a handful of fixed placeholder sets, so cache the compiled pattern per set.
+  const signature = names.join('\0');
+  let pattern = placeholderPatternCache.get(signature);
+  if (!pattern) {
+    pattern = new RegExp(`:(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g');
+    placeholderPatternCache.set(signature, pattern);
+  }
   return message.replace(pattern, (_match, name: string) => String(values[name]));
 }
 

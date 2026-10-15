@@ -15,7 +15,6 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import Alpine from 'alpinejs';
 import { registerFlowEdgeDirective } from './flow-edge';
-import { createTranslator } from '../../core/translations';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -73,7 +72,6 @@ function mountEdges(
     _layoutAnimTick: 0,
     _zoomLevel: 'close' as 'far' | 'medium' | 'close',
     viewport: { x: 0, y: 0, zoom: 1 },
-    t: createTranslator(),
     _config: { ...(opts.config ?? {}) } as Record<string, unknown>,
     _shapeRegistry: undefined as unknown,
     _nodeMap: new Map<string, MockNode>(),
