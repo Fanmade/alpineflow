@@ -187,7 +187,20 @@ function usable(value: unknown): string | undefined {
 
 function pickMessage(table: MessageTable, key: string, count: number | undefined, rules: Intl.PluralRules): string | undefined {
   if (count === undefined) return usable(table[key]);
-  return usable(table[`${key}_${rules.select(count)}`]) ?? usable(table[`${key}_other`]);
+  // A `count` value on a message without plural forms still resolves the plain key.
+  return usable(table[`${key}_${rules.select(count)}`]) ?? usable(table[`${key}_other`]) ?? usable(table[key]);
+}
+
+/**
+ * Substitute `:name` placeholders with the given values, longest name first
+ * (Laravel's order), so `:labelId` is not clobbered by `:label` and names may be
+ * followed directly by letters or underscores. Unknown placeholders stay literal.
+ */
+function substitute(message: string, values: Record<string, string | number>): string {
+  const names = Object.keys(values).sort((a, b) => b.length - a.length);
+  if (names.length === 0) return message;
+  const pattern = new RegExp(`:(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g');
+  return message.replace(pattern, (_match, name: string) => String(values[name]));
 }
 
 /**
@@ -214,8 +227,6 @@ export function createTranslator(translations?: FlowTranslations, locale?: strin
     const message = pickMessage(overrides, key, count, localeRules)
       ?? pickMessage(englishMessages, key, count, englishRules)
       ?? key;
-    return message.replace(/:([a-zA-Z]+)\b/g, (placeholder, name: string) =>
-      Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : placeholder,
-    );
+    return substitute(message, values);
   };
 }

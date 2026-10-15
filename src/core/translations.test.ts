@@ -32,7 +32,46 @@ describe('translations', () => {
     expect(createTranslator({ 'controls.zoomIn': 'Closer' })('controls.zoomOut')).toBe('Zoom out');
     expect(createTranslator({ 'a11y.nodeLabel': ':label / :label' })('a11y.nodeLabel', { label: '$& :id <b>' }))
       .toBe('$& :id <b> / $& :id <b>');
-    expect(Object.keys(de).sort()).toEqual(Object.keys(en).sort());
+  });
+
+  it('replaces known placeholders longest-first like Laravel, without word boundaries', () => {
+    const t = createTranslator({ 'a11y.nodeLabel': ':labelId/:label/:labelin/:count_x/:unknown' });
+    expect(t('a11y.nodeLabel', { label: 'A', labelId: 'B', count: 5 })).toBe('B/A/Ain/5_x/:unknown');
+  });
+
+  it('resolves a message without plural forms even when values carry a count', () => {
+    expect(createTranslator()('announce.viewportZoom', { percent: 50, count: 3 })).toBe('Viewport: zoom 50%');
+    expect(createTranslator(de)('a11y.nodeId', { id: 'n', count: 0 })).toBe('Knoten n');
+  });
+
+  it('validates every locale file against the English keys and placeholders', () => {
+    const files = import.meta.glob<Record<string, unknown>>('../../locales/*.json', { eager: true, import: 'default' });
+    const categories = ['zero', 'one', 'two', 'few', 'many', 'other'];
+    const placeholders = (text: string) => [...text.matchAll(/:([a-zA-Z]+)/g)].map((m) => m[1]).sort();
+    const english = en as Record<string, string>;
+    expect(Object.keys(files).length).toBeGreaterThan(1);
+    for (const [path, messages] of Object.entries(files)) {
+      const locale = path.replace(/^.*\/(.*)\.json$/, '$1');
+      if (locale === 'en') continue;
+      const allowed = new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
+      const pluralBases = new Set<string>();
+      for (const [key, value] of Object.entries(messages)) {
+        expect(english, `${locale}: unknown key ${key}`).toHaveProperty(key);
+        expect(typeof value, `${locale}: ${key} must be a string`).toBe('string');
+        const base = key.replace(/_(zero|one|two|few|many|other)$/, '');
+        const suffix = key.slice(base.length + 1);
+        const reference = english[key] ?? english[`${base}_other`];
+        expect(placeholders(value as string), `${locale}: placeholders of ${key}`).toEqual(placeholders(reference));
+        if (suffix) {
+          expect(allowed, `${locale}: plural category of ${key}`).toContain(suffix);
+          pluralBases.add(base);
+        }
+      }
+      for (const base of pluralBases) {
+        expect(messages, `${locale}: ${base} needs an _other form`).toHaveProperty(`${base}_other`);
+      }
+      expect(categories).toContain('other');
+    }
   });
 
   it('groups every key by UI area and ends plural keys with a CLDR category', () => {

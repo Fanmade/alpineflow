@@ -62,12 +62,6 @@ Core options that control the canvas appearance and viewport behavior.
 | `colorMode` | `'light' \| 'dark' \| 'system'` | — | Color mode management. `'system'` tracks OS preference. Adds/removes `.dark` class. |
 | `debug` | `boolean` | `false` | Enable debug logging to console. |
 
-## See also
-
-- [Background](../canvas/background.md)
-- [Viewport](../canvas/viewport.md)
-- [Theming](../theming/css-variables.md)
-
 ## Translations
 
 Pass a partial `translations` dictionary to `flowCanvas`. Each canvas manages its own messages, omitted keys retain their English defaults.
@@ -90,6 +84,9 @@ Alpine.data('germanDiagram', () => ({
     <div x-data="flowCanvas(config)" class="flow-container"></div>
 </div>
 ```
+
+Without a bundler, importing JSON in the browser needs an import attribute:
+`import de from '/vendor/alpineflow/locales/de.json' with { type: 'json' };`.
 
 The `FlowTranslations` interface lists every key with a short description of
 where it appears; `locales/en.json` holds the English defaults.
@@ -138,3 +135,9 @@ invalid tag falls back to `en`.
 Explicit `ariaLabel`, `loadingText`, node labels and custom announcement formatters
 keep precedence. Messages are resolved once when the canvas is created and are
 not reactive; recreate the canvas to change its language.
+
+## See also
+
+- [Background](../canvas/background.md)
+- [Viewport](../canvas/viewport.md)
+- [Theming](../theming/css-variables.md)
