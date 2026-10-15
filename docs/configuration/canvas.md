@@ -111,7 +111,16 @@ Developer diagnostics and condition expressions remain technical text.
 
 Messages are plain text. Keep placeholders such as `:label`, `:source`, `:target`
 and `:count` in your translations; values are substituted literally without
-interpreting HTML.
+interpreting HTML. Empty strings and non-string values (as some translation
+export tools write them) are ignored and fall back to English.
+
+Every canvas exposes its resolved messages as `t(key, values)`, so custom
+templates and toolbars can reuse them via `$flow`:
+
+```html
+<button @click="$flow.zoomIn()" :title="$flow.t('controls.zoomIn')">+</button>
+<span x-text="$flow.t('announce.nodesSelected', { count: $flow.selectedNodes.length })"></span>
+```
 
 Messages that carry a `:count` exist once per CLDR plural category, suffixed
 `_zero`, `_one`, `_two`, `_few`, `_many` or `_other` (i18next's convention), for
@@ -127,5 +136,5 @@ from `app()->getLocale()`. Underscores are normalised (`pt_BR` → `pt-BR`) and 
 invalid tag falls back to `en`.
 
 Explicit `ariaLabel`, `loadingText`, node labels and custom announcement formatters
-keep precedence. Messages are configured at initialization; recreate the canvas
-to change its language.
+keep precedence. Messages are resolved once when the canvas is created and are
+not reactive; recreate the canvas to change its language.

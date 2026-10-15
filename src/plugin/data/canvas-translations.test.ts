@@ -37,3 +37,20 @@ it('pluralises announcements with the configured canvas locale', () => {
 
   canvas._announcer.destroy();
 });
+
+it('exposes a canvas-level t() that directives and $flow share', () => {
+  const canvas = realCanvas({ translations: de, locale: 'de' });
+  expect(canvas.t('controls.zoomIn')).toBe('Vergrößern');
+  expect(canvas.t('a11y.nodeLabel', { label: 'A' })).toBe('Knoten: A');
+  expect(canvas.t('announce.connectionsRemoved', { count: 1 })).toBe('1 Verbindung entfernt');
+  expect(realCanvas().t('controls.zoomIn')).toBe('Zoom in');
+});
+
+it('still starts when a translation value is not a string', () => {
+  const canvas = realCanvas({ translations: { 'canvas.loading': 0, 'canvas.label': '' } as any });
+  canvas._container = document.createElement('div');
+  canvas._initAnnouncer();
+  expect(canvas._loadingText).toBe('Loading…');
+  expect(canvas.t('canvas.label')).toBe('Flow diagram');
+  canvas._announcer.destroy();
+});

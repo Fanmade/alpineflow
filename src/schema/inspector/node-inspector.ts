@@ -32,7 +32,6 @@
 // Consumer themes style via CSS. This directive writes no styles of its own.
 // ============================================================================
 
-import { translate } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import {
     lastInSet,
@@ -155,7 +154,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
     if (!node) {
         const empty = document.createElement('div');
         empty.setAttribute('data-schema-inspector-empty', '');
-        empty.textContent = translate(canvas._config?.translations, 'schema.inspector.noNode');
+        empty.textContent = canvas.t('schema.inspector.noNode');
         root.appendChild(empty);
         restoreStampFocus(root, captured);
         return;
@@ -188,7 +187,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.setAttribute('data-action', 'remove');
-        removeBtn.textContent = translate(canvas._config?.translations, 'schema.inspector.remove');
+        removeBtn.textContent = canvas.t('schema.inspector.remove');
         removeBtn.addEventListener('click', () => {
             canvas.removeField?.(node.id, f.name);
         });
@@ -203,7 +202,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
 
     const nameInput = document.createElement('input');
     nameInput.setAttribute('data-field', 'name');
-    nameInput.placeholder = translate(canvas._config?.translations, 'schema.inspector.fieldName');
+    nameInput.placeholder = canvas.t('schema.inspector.fieldName');
     form.appendChild(nameInput);
 
     const registry = Array.isArray(canvas._config?.fieldTypeRegistry)
@@ -225,7 +224,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
     } else {
         const input = document.createElement('input');
         input.setAttribute('data-field', 'type');
-        input.placeholder = translate(canvas._config?.translations, 'schema.inspector.type');
+        input.placeholder = canvas.t('schema.inspector.type');
         input.value = 'text';
         typeInput = input;
     }
@@ -233,7 +232,7 @@ function stampNodeDefaultUi(host: HTMLElement, canvas: any): void {
 
     const addBtn = document.createElement('button');
     addBtn.type = 'submit';
-    addBtn.textContent = translate(canvas._config?.translations, 'schema.inspector.add');
+    addBtn.textContent = canvas.t('schema.inspector.add');
     form.appendChild(addBtn);
 
     form.addEventListener('submit', (e) => {

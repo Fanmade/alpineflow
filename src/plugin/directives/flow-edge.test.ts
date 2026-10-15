@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import Alpine from 'alpinejs';
 import { registerFlowEdgeDirective } from './flow-edge';
 import { CORRIDOR_MARGIN } from '../../core/edge-paths/orthogonal';
+import { createTranslator } from '../../core/translations';
 
 // ============================================================================
 // x-flow-edge directive — reactivity-scoping tests (Workstream 4)
@@ -85,6 +86,7 @@ function mountEdges(
     // defaulting to 'close' here is safe.
     _zoomLevel: 'close' as 'far' | 'medium' | 'close',
     viewport: { x: 0, y: 0, zoom: 1 },
+    t: createTranslator(),
     _config: { ...(opts.config ?? {}) } as Record<string, unknown>,
     _shapeRegistry: undefined as unknown,
     // toAbsoluteNode returns parentless nodes untouched, so an empty map is fine

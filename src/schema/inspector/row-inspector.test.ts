@@ -8,6 +8,7 @@ import Alpine from 'alpinejs';
 import registerSchemaAddon from '../index';
 import { registerRowInspectorDirective } from './row-inspector';
 import { _resetRegistry } from '../../core/registry';
+import { createTranslator } from '../../core/translations';
 
 function clearChildren(el: HTMLElement): void {
     while (el.firstChild) {
@@ -46,6 +47,7 @@ function mount(options: MountOptions = {}) {
     const selectedRowId = options.selectedRowId ?? null;
 
     Alpine.data('canvas', () => ({
+        t: createTranslator(),
         nodes: [
             {
                 id: 'user',

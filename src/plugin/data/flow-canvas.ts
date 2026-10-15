@@ -67,7 +67,7 @@ import { createColorMode, type ColorModeHandle } from '../../core/color-mode';
 import type { CollabConfig } from '../../collab/types';
 import { collabStore } from '../../collab/store';
 import { getAddon, getRegistry } from '../../core/registry';
-import { translate } from '../../core/translations';
+import { createTranslator, type TranslationKey, type Translator } from '../../core/translations';
 import { FlowAnnouncer } from '../../core/announcer';
 import { ComputeEngine } from '../../core/compute';
 import { registerWireEvents, registerWireCommands, registerCustomWireCommands } from '../../core/wire-bridge';
@@ -154,6 +154,8 @@ export function isOverlayDropTarget(el: Element | null): boolean {
 
 export function registerFlowCanvas(Alpine: Alpine) {
   Alpine.data('flowCanvas', (config: FlowCanvasConfig = {}) => {
+    // Resolved once per canvas: plain closure state, deliberately outside Alpine reactivity.
+    const translator: Translator = createTranslator(config.translations, config.locale);
     const self: Record<string, any> = {
     // ── Reactive State ────────────────────────────────────────────────
     /** Unique instance ID for SVG marker dedup, etc. */
@@ -174,7 +176,15 @@ export function registerFlowCanvas(Alpine: Alpine) {
     _userLoading: (config.loading ?? false) as boolean,
 
     /** Custom text for the default loading indicator */
-    _loadingText: (config.loadingText ?? translate(config.translations, 'canvas.loading')) as string,
+    _loadingText: (config.loadingText ?? translator('canvas.loading')) as string,
+
+    /**
+     * Translate a UI message for this canvas (`$flow.t('controls.zoomIn')` in templates).
+     * Messages are resolved once at creation from `config.translations` + `config.locale`.
+     */
+    t(key: TranslationKey, values?: Record<string, string | number>): string {
+      return translator(key, values);
+    },
 
     /** Auto-injected loading overlay element (when config.loading: true and no directive) */
     _autoLoadingOverlay: null as HTMLElement | null,
@@ -1225,7 +1235,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
         this._container.setAttribute('data-fit-view', '');
       }
       this._container.setAttribute('role', 'application');
-      this._container.setAttribute('aria-label', config.ariaLabel ?? translate(config.translations, 'canvas.label'));
+      this._container.setAttribute('aria-label', config.ariaLabel ?? this.t('canvas.label'));
       this._containerStyles = getComputedStyle(this._container);
       this._animator = new Animator(engine);
 
@@ -1299,7 +1309,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
         const formatFn = typeof config.announcements === 'object'
           ? config.announcements.formatMessage
           : undefined;
-        this._announcer = new FlowAnnouncer(this._container, formatFn, config.translations, config.locale);
+        this._announcer = new FlowAnnouncer(this._container, formatFn, translator);
       }
     },
 
@@ -1683,7 +1693,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
 
         const indicator = document.createElement('div');
         indicator.className = 'flow-touch-selection-mode-indicator';
-        indicator.textContent = translate(config.translations, 'canvas.selectionMode');
+        indicator.textContent = this.t('canvas.selectionMode');
         container.appendChild(indicator);
 
         this._touchSelectionCleanup = () => {
@@ -1894,7 +1904,7 @@ export function registerFlowCanvas(Alpine: Alpine) {
 
         const isExternal = controlsContainer !== this._container;
         this._controls = createControlsPanel(controlsContainer!, {
-          translations: config.translations,
+          t: translator,
           position: config.controlsPosition ?? 'bottom-left',
           orientation: config.controlsOrientation ?? 'vertical',
           external: isExternal,

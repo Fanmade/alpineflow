@@ -5,7 +5,7 @@
  * flow diagram changes. Hooks into _emit() via handleEvent().
  */
 
-import { translate, type FlowTranslations, type TranslationKey } from './translations';
+import { createTranslator, type Translator } from './translations';
 
 export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) => string | null;
 
@@ -13,8 +13,7 @@ export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) 
  * Default event-to-announcement formatter.
  * Returns null for events that should not be announced.
  */
-export function defaultFormatAnnouncement(event: string, detail: Record<string, any>, translations?: FlowTranslations, locale?: string): string | null {
-  const t = (key: TranslationKey, values?: Record<string, string | number>) => translate(translations, key, values, locale);
+export function defaultFormatAnnouncement(event: string, detail: Record<string, any>, t: Translator = createTranslator()): string | null {
   switch (event) {
     case 'nodes-change': {
       const nodes = detail.nodes ?? [];
@@ -85,8 +84,8 @@ export class FlowAnnouncer {
   private _clearTimer: ReturnType<typeof setTimeout> | null = null;
   private _formatMessage: FormatAnnouncementFn;
 
-  constructor(container: HTMLElement, formatMessage?: FormatAnnouncementFn, translations?: FlowTranslations, locale?: string) {
-    this._formatMessage = formatMessage ?? ((event, detail) => defaultFormatAnnouncement(event, detail, translations, locale));
+  constructor(container: HTMLElement, formatMessage?: FormatAnnouncementFn, t?: Translator) {
+    this._formatMessage = formatMessage ?? ((event, detail) => defaultFormatAnnouncement(event, detail, t));
 
     this._el = document.createElement('div');
     this._el.setAttribute('aria-live', 'polite');

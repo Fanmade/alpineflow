@@ -175,33 +175,47 @@ export function resolvePluralRules(locale?: string): Intl.PluralRules {
   return rules;
 }
 
-function pickMessage(
-  translations: FlowTranslations,
-  key: string,
-  count: number | undefined,
-  rules: Intl.PluralRules,
-): string | undefined {
-  const dictionary = translations as Record<string, string | undefined>;
-  if (count === undefined) return dictionary[key];
-  return dictionary[`${key}_${rules.select(count)}`] ?? dictionary[`${key}_other`];
+/** Translates a message key with optional placeholder values. See {@link createTranslator}. */
+export type Translator = (key: TranslationKey, values?: Record<string, string | number>) => string;
+
+type MessageTable = Record<string, string | undefined>;
+
+/** Only non-empty strings count as translations; anything else falls through to the next fallback. */
+function usable(value: unknown): string | undefined {
+  return typeof value === 'string' && value !== '' ? value : undefined;
+}
+
+function pickMessage(table: MessageTable, key: string, count: number | undefined, rules: Intl.PluralRules): string | undefined {
+  if (count === undefined) return usable(table[key]);
+  return usable(table[`${key}_${rules.select(count)}`]) ?? usable(table[`${key}_other`]);
 }
 
 /**
- * Resolve a message with English fallback and literal :placeholder substitution.
- * A numeric `count` selects the CLDR plural form (`key_one`, `key_few`, …) using
- * the locale's rules; English fallbacks always use English plural rules.
+ * Build a translator for one canvas. The overrides are copied once into a plain
+ * object, so later changes to the source dictionary (or Alpine reactivity on it)
+ * do not affect the result; recreate the canvas to change its language.
+ *
+ * Lookup order: the override for the locale's plural category, the override's
+ * `_other` form, then the English message selected with English plural rules.
+ * Empty strings and non-string values are ignored. Placeholders (`:label`) are
+ * substituted literally.
  */
-export function translate(
-  translations: FlowTranslations | undefined,
-  key: TranslationKey,
-  replacements: Record<string, string | number> = {},
-  locale?: string,
-): string {
-  const count = typeof replacements.count === 'number' ? replacements.count : undefined;
-  const message = pickMessage(translations ?? {}, key, count, resolvePluralRules(locale))
-    ?? pickMessage(englishMessages, key, count, resolvePluralRules(FALLBACK_LOCALE))
-    ?? key;
-  return message.replace(/:([a-zA-Z]+)\b/g, (placeholder, name: string) =>
-    Object.prototype.hasOwnProperty.call(replacements, name) ? String(replacements[name]) : placeholder,
-  );
+export function createTranslator(translations?: FlowTranslations, locale?: string): Translator {
+  const overrides: MessageTable = {};
+  for (const [key, value] of Object.entries(translations ?? {})) {
+    const text = usable(value);
+    if (text !== undefined) overrides[key] = text;
+  }
+  const localeRules = resolvePluralRules(locale);
+  const englishRules = resolvePluralRules(FALLBACK_LOCALE);
+
+  return (key, values = {}) => {
+    const count = typeof values.count === 'number' ? values.count : undefined;
+    const message = pickMessage(overrides, key, count, localeRules)
+      ?? pickMessage(englishMessages, key, count, englishRules)
+      ?? key;
+    return message.replace(/:([a-zA-Z]+)\b/g, (placeholder, name: string) =>
+      Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : placeholder,
+    );
+  };
 }

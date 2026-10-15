@@ -19,6 +19,7 @@ vi.mock('../../core/drag', () => ({
 
 import { createDrag, type DragOptions } from '../../core/drag';
 import { registerFlowNodeDirective } from './flow-node';
+import { createTranslator } from '../../core/translations';
 
 function clearChildren(el: HTMLElement): void {
   while (el.firstChild) el.removeChild(el.firstChild);
@@ -40,6 +41,7 @@ function baseCanvas(nodes: Record<string, unknown>[]): () => Record<string, unkn
     // autoPanOnNodeDrag: false keeps onDragStart out of the createAutoPan
     // branch, which needs a much larger canvas mock (panZoom, etc.) — not
     // relevant to what this file is testing.
+    t: createTranslator(),
     _config: { nodeOrigin: [0, 0], autoPanOnNodeDrag: false } as Record<string, unknown>,
     _childrenIds: new Map<string, string[]>(),
     _shapeRegistry: {} as Record<string, unknown>,

@@ -8,6 +8,7 @@ import Alpine from 'alpinejs';
 import registerSchemaAddon from '../index';
 import { registerEdgeInspectorDirective } from './edge-inspector';
 import { _resetRegistry } from '../../core/registry';
+import { createTranslator } from '../../core/translations';
 
 function clearChildren(el: HTMLElement): void {
     while (el.firstChild) {
@@ -45,6 +46,7 @@ function mount(options: MountOptions = {}) {
     const selectedEdgeId = options.selectedEdgeId ?? null;
 
     Alpine.data('canvas', () => ({
+        t: createTranslator(),
         nodes: [
             { id: 'user', position: { x: 0, y: 0 }, data: { label: 'User', fields: [] } },
             { id: 'team', position: { x: 200, y: 0 }, data: { label: 'Team', fields: [] } },

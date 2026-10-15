@@ -6,7 +6,7 @@
 // with Alpine's reactive proxy model.
 // ============================================================================
 
-import type { FlowTranslations } from './translations';
+import type { FlowTranslations, TranslationKey } from './translations';
 import type { EasingName } from '../animate/easing';
 import type { PathFunction } from '../animate/paths';
 import type { CollabConfig, CollabInstance } from '../collab/types';
@@ -2302,6 +2302,13 @@ export interface FlowInstance {
 
   /** Update runtime config options (zoom limits, background, colorMode, etc.). */
   patchConfig(changes: Partial<PatchableConfig>): void;
+
+  /**
+   * Translate a UI message of this canvas (`$flow.t('controls.zoomIn')` in templates).
+   * Resolved once at creation from `translations` + `locale`; a numeric `count`
+   * selects the plural form. Unknown or missing keys fall back to English.
+   */
+  t(key: TranslationKey, values?: Record<string, string | number>): string;
 
   /** Current resolved color mode, or undefined if not managed. */
   readonly colorMode?: 'light' | 'dark';

@@ -24,7 +24,6 @@
 //   </div>
 // ============================================================================
 
-import { translate } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import {
     lastInSet,
@@ -151,7 +150,7 @@ function stampRowDefaultUi(
     if (!row) {
         const empty = document.createElement('div');
         empty.setAttribute('data-schema-inspector-empty', '');
-        empty.textContent = translate(canvas._config?.translations, 'schema.inspector.noRow');
+        empty.textContent = canvas.t('schema.inspector.noRow');
         root.appendChild(empty);
         restoreStampFocus(root, captured);
         return;
@@ -163,7 +162,7 @@ function stampRowDefaultUi(
     if (!field) {
         const missing = document.createElement('div');
         missing.setAttribute('data-schema-inspector-empty', '');
-        missing.textContent = translate(canvas._config?.translations, 'schema.inspector.missingRow');
+        missing.textContent = canvas.t('schema.inspector.missingRow');
         root.appendChild(missing);
         restoreStampFocus(root, captured);
         return;
@@ -171,7 +170,7 @@ function stampRowDefaultUi(
 
     // Name
     const nameLabel = document.createElement('label');
-    nameLabel.textContent = translate(canvas._config?.translations, 'schema.inspector.name') + ' ';
+    nameLabel.textContent = canvas.t('schema.inspector.name') + ' ';
     const nameInput = document.createElement('input');
     nameInput.setAttribute('data-field', 'name');
     nameInput.value = String(field.name ?? '');
@@ -187,7 +186,7 @@ function stampRowDefaultUi(
 
     // Type
     const typeLabel = document.createElement('label');
-    typeLabel.textContent = translate(canvas._config?.translations, 'schema.inspector.type') + ' ';
+    typeLabel.textContent = canvas.t('schema.inspector.type') + ' ';
     const typeInput = document.createElement('input');
     typeInput.setAttribute('data-field', 'type');
     typeInput.value = String(field.type ?? '');
@@ -199,7 +198,7 @@ function stampRowDefaultUi(
 
     // Required
     const requiredLabel = document.createElement('label');
-    requiredLabel.textContent = translate(canvas._config?.translations, 'schema.inspector.required') + ' ';
+    requiredLabel.textContent = canvas.t('schema.inspector.required') + ' ';
     const requiredInput = document.createElement('input');
     requiredInput.type = 'checkbox';
     requiredInput.setAttribute('data-field', 'required');
@@ -214,7 +213,7 @@ function stampRowDefaultUi(
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.setAttribute('data-action', 'remove');
-    removeBtn.textContent = translate(canvas._config?.translations, 'schema.inspector.remove');
+    removeBtn.textContent = canvas.t('schema.inspector.remove');
     removeBtn.addEventListener('click', () => {
         canvas.removeField?.(row.nodeId, row.fieldName);
     });

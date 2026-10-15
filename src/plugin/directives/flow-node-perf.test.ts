@@ -13,6 +13,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import Alpine from 'alpinejs';
 import { registerFlowNodeDirective } from './flow-node';
+import { createTranslator } from '../../core/translations';
 
 function clearChildren(el: HTMLElement): void {
   while (el.firstChild) el.removeChild(el.firstChild);
@@ -27,6 +28,7 @@ function baseCanvas(): () => Record<string, any> {
     viewport: { x: 0, y: 0, zoom: 1 },
     selectedNodes: new Set<string>(),
     selectedEdges: new Set<string>(),
+    t: createTranslator(),
     _config: { nodeOrigin: [0, 0] },
     _childrenIds: new Map<string, string[]>(),
     _shapeRegistry: {} as Record<string, any>,
