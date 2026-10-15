@@ -230,3 +230,17 @@ export function createTranslator(translations?: FlowTranslations, locale?: strin
     return substitute(message, values);
   };
 }
+
+/** English messages with English plural rules, shared by call sites that have no canvas. */
+export const englishTranslator: Translator = createTranslator(undefined, FALLBACK_LOCALE);
+
+/**
+ * Translator for a directive's canvas scope: delegates to the canvas `t()` when
+ * present, otherwise English. Lets directives and inspectors mount against a
+ * plain `x-data` host (tests, custom shells) without a `flowCanvas` instance.
+ */
+export function canvasTranslator(canvas: unknown): Translator {
+  const scope = canvas as { t?: unknown } | null | undefined;
+  if (typeof scope?.t !== 'function') return englishTranslator;
+  return (key, values) => (scope as { t: Translator }).t(key, values);
+}

@@ -11,7 +11,6 @@ import { registerFlowSchemaDirective } from '../plugin/directives/flow-schema';
 import { registerFlowHandleDirective } from '../plugin/directives/flow-handle';
 import { registerFlowRowSelectDirective } from '../plugin/directives/flow-row-select';
 import { _resetRegistry } from '../core/registry';
-import { createTranslator } from '../core/translations';
 
 function clearChildren(el: HTMLElement): void {
     while (el.firstChild) {
@@ -84,7 +83,6 @@ function mount(nodes: NodeSpec[] = [{ id: 'user', fieldNames: ['f0', 'f1', 'f2']
     }
 
     Alpine.data('canvas', () => ({
-        t: createTranslator(),
         _config: { keyboardConnect: true },
         nodes: nodes.map((n) => ({
             id: n.id,
@@ -286,7 +284,7 @@ describe('x-flow-schema integration — keyboardConnect flag', () => {
         container.classList.add('flow-container');
         container.setAttribute(
             'x-data',
-            `{ _config: { keyboardConnect: ${keyboardConnect} }, t: (key) => key, node: { id: 't', data: { label: 'User', fields: [{ name: 'id', type: 'uuid' }, { name: 'email', type: 'text' }] } } }`,
+            `{ _config: { keyboardConnect: ${keyboardConnect} }, node: { id: 't', data: { label: 'User', fields: [{ name: 'id', type: 'uuid' }, { name: 'email', type: 'text' }] } } }`,
         );
         const target = document.createElement('div');
         target.setAttribute('x-flow-schema', '');

@@ -5,7 +5,7 @@
  * flow diagram changes. Hooks into _emit() via handleEvent().
  */
 
-import { createTranslator, type Translator } from './translations';
+import { englishTranslator, type Translator } from './translations';
 
 export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) => string | null;
 
@@ -13,7 +13,7 @@ export type FormatAnnouncementFn = (event: string, detail: Record<string, any>) 
  * Default event-to-announcement formatter.
  * Returns null for events that should not be announced.
  */
-export function defaultFormatAnnouncement(event: string, detail: Record<string, any>, t: Translator = createTranslator()): string | null {
+export function defaultFormatAnnouncement(event: string, detail: Record<string, any>, t: Translator = englishTranslator): string | null {
   switch (event) {
     case 'nodes-change': {
       const nodes = detail.nodes ?? [];

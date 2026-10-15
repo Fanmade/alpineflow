@@ -23,7 +23,7 @@
 // XSS-safe: all dynamic text uses textContent; no innerHTML anywhere.
 // ============================================================================
 
-import { createTranslator, type Translator } from '../../core/translations';
+import { canvasTranslator } from '../../core/translations';
 import type { Alpine } from 'alpinejs';
 import { prettyPrintCondition } from '../../workflow/condition-pretty-print';
 
@@ -52,8 +52,7 @@ export function registerFlowConditionDirective(Alpine: Alpine) {
     Alpine.directive('flow-condition', (el, { expression }, { evaluate, effect, cleanup }) => {
         const host = el as HTMLElement;
         const canvasEl = host.closest('[data-flow-canvas]') as HTMLElement | null;
-        const canvas = canvasEl ? (Alpine.$data(canvasEl) as any) : null;
-        const t: Translator = typeof canvas?.t === 'function' ? (key, values) => canvas.t(key, values) : createTranslator();
+        const t = canvasTranslator(canvasEl ? Alpine.$data(canvasEl) : null);
 
         const readNode = (): NodeRef => {
             try {

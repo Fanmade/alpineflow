@@ -5,7 +5,7 @@
 // lock toggle buttons. Follows the same DOM injection pattern as MiniMap.
 // ============================================================================
 
-import { createTranslator, type Translator } from './translations';
+import { englishTranslator, type Translator } from './translations';
 import { isolateCanvasGestures } from './canvas-gestures';
 
 export interface ControlsPanelOptions {
@@ -60,7 +60,7 @@ export function createControlsPanel(
   container: HTMLElement,
   options: ControlsPanelOptions,
 ): ControlsPanelInstance {
-  const t = options.t ?? createTranslator();
+  const t = options.t ?? englishTranslator;
   const {
     position,
     orientation,

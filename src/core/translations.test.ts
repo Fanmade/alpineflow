@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
-import { createTranslator, type FlowTranslations, type TranslationKey } from './translations';
+import { canvasTranslator, createTranslator, resolvePluralRules, type FlowTranslations, type TranslationKey } from './translations';
 import en from '../../locales/en.json';
 import de from '../../locales/de.json';
 import { createControlsPanel } from './controls-panel';
@@ -46,14 +46,14 @@ describe('translations', () => {
 
   it('validates every locale file against the English keys and placeholders', () => {
     const files = import.meta.glob<Record<string, unknown>>('../../locales/*.json', { eager: true, import: 'default' });
-    const categories = ['zero', 'one', 'two', 'few', 'many', 'other'];
     const placeholders = (text: string) => [...text.matchAll(/:([a-zA-Z]+)/g)].map((m) => m[1]).sort();
     const english = en as Record<string, string>;
     expect(Object.keys(files).length).toBeGreaterThan(1);
     for (const [path, messages] of Object.entries(files)) {
       const locale = path.replace(/^.*\/(.*)\.json$/, '$1');
       if (locale === 'en') continue;
-      const allowed = new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
+      // resolvePluralRules tolerates Laravel-style file names such as `pt_BR.json`.
+      const allowed = resolvePluralRules(locale).resolvedOptions().pluralCategories;
       const pluralBases = new Set<string>();
       for (const [key, value] of Object.entries(messages)) {
         expect(english, `${locale}: unknown key ${key}`).toHaveProperty(key);
@@ -70,7 +70,6 @@ describe('translations', () => {
       for (const base of pluralBases) {
         expect(messages, `${locale}: ${base} needs an _other form`).toHaveProperty(`${base}_other`);
       }
-      expect(categories).toContain('other');
     }
   });
 
@@ -141,6 +140,16 @@ describe('translations', () => {
     const t = createTranslator(source);
     source['controls.zoomIn'] = 'Geändert';
     expect(t('controls.zoomIn')).toBe('Näher');
+  });
+
+  it('delegates to the canvas t() and falls back to English for scopes without one', () => {
+    const calls: unknown[] = [];
+    const scope = { t: (key: string, values?: unknown) => { calls.push([key, values]); return 'from canvas'; } };
+    expect(canvasTranslator(scope)('controls.zoomIn')).toBe('from canvas');
+    expect(calls).toEqual([['controls.zoomIn', undefined]]);
+    expect(canvasTranslator({})('controls.zoomIn')).toBe('Zoom in');
+    expect(canvasTranslator(null)('announce.nodesSelected', { count: 2 })).toBe('2 nodes');
+    expect(canvasTranslator(undefined)).toBe(canvasTranslator({ t: 'nope' }));
   });
 
   it('keeps controls isolated and translates state changes without inserting markup', () => {
