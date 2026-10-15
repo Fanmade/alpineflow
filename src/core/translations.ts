@@ -1,12 +1,10 @@
 import en from '../../locales/en.json';
 
 /**
- * UI messages of a canvas. Every key is optional; missing keys fall back to
- * English. Messages are plain text with literal `:placeholder` substitution.
- * Keys that carry a `:count` exist once per CLDR plural category (`_one`,
- * `_other`, …) and are selected with the canvas `locale`.
+ * Every message the engine ships, keyed as in `locales/en.json`. Messages that
+ * carry a `:count` appear in the two plural forms English uses, `_one` and `_other`.
  */
-export interface FlowTranslations {
+interface EnglishMessages {
   /** Accessible name of the controls panel. */
   'controls.label'?: string;
   /** Tooltip / accessible name of the zoom-in button. */
@@ -136,6 +134,28 @@ export interface FlowTranslations {
 
 type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 
+/** Base keys of the messages with plural forms, e.g. `announce.nodesSelected`. */
+type PluralMessage = keyof EnglishMessages extends infer K
+  ? K extends `${infer Base}_other` ? Base : never
+  : never;
+
+/**
+ * Plural forms other languages need besides `_one` / `_other`: Arabic uses `_zero`
+ * and `_two`, Polish and Russian `_few` and `_many`. A language's categories are
+ * listed by `new Intl.PluralRules(locale).resolvedOptions().pluralCategories`.
+ */
+type AdditionalPluralForms = {
+  [K in `${PluralMessage}_${Exclude<PluralCategory, 'one' | 'other'>}`]?: string;
+};
+
+/**
+ * UI messages of a canvas. Every key is optional; missing keys fall back to
+ * English. Messages are plain text with literal `:placeholder` substitution.
+ * Keys that carry a `:count` exist once per CLDR plural category (`_one`,
+ * `_few`, `_other`, …) and are selected with the canvas `locale`.
+ */
+export interface FlowTranslations extends EnglishMessages, AdditionalPluralForms {}
+
 type MessageKey = keyof FlowTranslations;
 
 /** Message keys as callers use them: plural variants collapse onto their base key. */
@@ -148,10 +168,10 @@ type SameKeys<A, B> = [keyof A] extends [keyof B] ? ([keyof B] extends [keyof A]
 
 /**
  * English defaults. The annotation fails `tsc` when `locales/en.json` and
- * {@link FlowTranslations} disagree on a key, so the interface stays the single
+ * {@link EnglishMessages} disagree on a key, so the interface stays the single
  * typed source and the emitted declarations carry no JSON import.
  */
-const englishMessages: SameKeys<typeof en, Required<FlowTranslations>> = en;
+const englishMessages: SameKeys<typeof en, Required<EnglishMessages>> = en;
 
 const FALLBACK_LOCALE = 'en';
 const pluralRulesCache = new Map<string, Intl.PluralRules>();

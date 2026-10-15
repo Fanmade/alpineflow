@@ -125,7 +125,8 @@ example `announce.nodesSelected_one` / `announce.nodesSelected_other`. The form 
 picked with `Intl.PluralRules` for the canvas `locale`, so French treats `0` as
 singular and Polish uses `_few` / `_many`. Provide the categories your language
 needs; `_other` is used when a category is missing, and English fallbacks always
-follow English plural rules. For grammar beyond plurals, use the existing
+follow English plural rules. A specific form such as `_one` or `_two` may spell
+the number out instead of using `:count`; `_other` must keep `:count`. For grammar beyond plurals, use the existing
 `announcements.formatMessage` callback; it receives the canvas translator as
 third argument, so it can delegate unhandled events to the default formatter
 without losing translations.

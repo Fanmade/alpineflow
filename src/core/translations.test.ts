@@ -11,7 +11,72 @@ const polish = {
   'announce.nodesSelected_few': ':count węzły',
   'announce.nodesSelected_many': ':count węzłów',
   'announce.nodesSelected_other': ':count węzła',
-};
+} satisfies FlowTranslations;
+
+// Arabic uses all six plural categories; the dual (`_two`) usually spells the number out.
+const arabic = {
+  'announce.nodesAdded_zero': 'zero form',
+  'announce.nodesAdded_one': 'one form',
+  'announce.nodesAdded_two': 'dual form',
+  'announce.nodesAdded_few': 'few form :count',
+  'announce.nodesAdded_many': 'many form :count',
+  'announce.nodesAdded_other': 'other form :count',
+} satisfies FlowTranslations;
+
+const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+
+/**
+ * Everything that would make a locale file wrong at runtime; empty when the file is valid.
+ * Keys may be omitted (they fall back to English), but every key present must exist in
+ * English, hold a string, keep English's placeholders and only use plural categories the
+ * locale has. A specific plural form may spell the number out; `_other` must keep `:count`.
+ */
+function localeFileProblems(locale: string, messages: Record<string, unknown>): string[] {
+  const english = en as Record<string, string>;
+  const placeholders = (text: string) => new Set([...text.matchAll(/:([a-zA-Z]+)/g)].map((m) => m[1]));
+  const problems: string[] = [];
+  let supported: string[] = [];
+  try {
+    supported = Intl.PluralRules.supportedLocalesOf(locale.replace(/_/g, '-'));
+  } catch {
+    // An invalid tag is reported below.
+  }
+  if (supported.length === 0) problems.push(`${locale} is not a locale Intl.PluralRules knows`);
+  // resolvePluralRules tolerates Laravel-style file names such as `pt_BR.json`.
+  const categories: string[] = resolvePluralRules(locale).resolvedOptions().pluralCategories;
+  const pluralBases = new Set<string>();
+  for (const [key, value] of Object.entries(messages)) {
+    const base = key.replace(PLURAL_SUFFIX, '');
+    const suffix = key.slice(base.length + 1);
+    // Plural forms are checked against the English `_other` form of their message.
+    const reference = suffix ? english[`${base}_other`] : english[key];
+    if (reference === undefined) {
+      problems.push(`unknown key ${key}`);
+      continue;
+    }
+    if (typeof value !== 'string') {
+      problems.push(`${key} must be a string`);
+      continue;
+    }
+    if (suffix) {
+      pluralBases.add(base);
+      if (!categories.includes(suffix)) problems.push(`${key}: ${locale} has no "${suffix}" plural category`);
+    }
+    const expected = placeholders(reference);
+    const actual = placeholders(value);
+    for (const name of actual) {
+      if (!expected.has(name)) problems.push(`${key}: unknown placeholder :${name}`);
+    }
+    for (const name of expected) {
+      const spelledOut = name === 'count' && suffix !== '' && suffix !== 'other';
+      if (!actual.has(name) && !spelledOut) problems.push(`${key}: missing placeholder :${name}`);
+    }
+  }
+  for (const base of pluralBases) {
+    if (!(`${base}_other` in messages)) problems.push(`${base} needs an _other form`);
+  }
+  return problems;
+}
 
 describe('translations', () => {
   afterEach(() => {
@@ -22,10 +87,18 @@ describe('translations', () => {
     const overrides: FlowTranslations = { ...en, 'controls.zoomIn': 'Closer' };
     // @ts-expect-error unknown keys are rejected instead of widening to any
     const typo: FlowTranslations = { 'controls.zoomInn': 'Closer' };
-    expectTypeOf<keyof FlowTranslations>().toEqualTypeOf<keyof typeof en>();
+    const polishForms: FlowTranslations = { 'announce.edgesSelected_few': ':count krawędzie' };
+    // @ts-expect-error only messages with a count have plural forms
+    const notPlural: FlowTranslations = { 'controls.zoomIn_few': 'Closer' };
+    type PluralMessage = 'announce.nodesAdded' | 'announce.nodesRemoved' | 'announce.connectionsAdded'
+      | 'announce.connectionsRemoved' | 'announce.nodesSelected' | 'announce.edgesSelected';
+    expectTypeOf<Extract<keyof FlowTranslations, keyof typeof en>>().toEqualTypeOf<keyof typeof en>();
+    expectTypeOf<Exclude<keyof FlowTranslations, keyof typeof en>>()
+      .toEqualTypeOf<`${PluralMessage}_${'zero' | 'two' | 'few' | 'many'}`>();
     expectTypeOf<'announce.nodesSelected'>().toMatchTypeOf<TranslationKey>();
     expectTypeOf<'announce.nodesSelected_one'>().not.toMatchTypeOf<TranslationKey>();
-    expect(createTranslator({ ...overrides, ...typo })('controls.zoomIn')).toBe('Closer');
+    expectTypeOf<'announce.nodesSelected_few'>().not.toMatchTypeOf<TranslationKey>();
+    expect(createTranslator({ ...overrides, ...typo, ...polishForms, ...notPlural })('controls.zoomIn')).toBe('Closer');
   });
 
   it('falls back per dotted key and substitutes values literally in one pass', () => {
@@ -51,31 +124,41 @@ describe('translations', () => {
 
   it('validates every locale file against the English keys and placeholders', () => {
     const files = import.meta.glob<Record<string, unknown>>('../../locales/*.json', { eager: true, import: 'default' });
-    const placeholders = (text: string) => [...text.matchAll(/:([a-zA-Z]+)/g)].map((m) => m[1]).sort();
-    const english = en as Record<string, string>;
     expect(Object.keys(files).length).toBeGreaterThan(1);
     for (const [path, messages] of Object.entries(files)) {
       const locale = path.replace(/^.*\/(.*)\.json$/, '$1');
       if (locale === 'en') continue;
-      // resolvePluralRules tolerates Laravel-style file names such as `pt_BR.json`.
-      const allowed = resolvePluralRules(locale).resolvedOptions().pluralCategories;
-      const pluralBases = new Set<string>();
-      for (const [key, value] of Object.entries(messages)) {
-        expect(english, `${locale}: unknown key ${key}`).toHaveProperty(key);
-        expect(typeof value, `${locale}: ${key} must be a string`).toBe('string');
-        const base = key.replace(/_(zero|one|two|few|many|other)$/, '');
-        const suffix = key.slice(base.length + 1);
-        const reference = english[key] ?? english[`${base}_other`];
-        expect(placeholders(value as string), `${locale}: placeholders of ${key}`).toEqual(placeholders(reference));
-        if (suffix) {
-          expect(allowed, `${locale}: plural category of ${key}`).toContain(suffix);
-          pluralBases.add(base);
-        }
-      }
-      for (const base of pluralBases) {
-        expect(messages, `${locale}: ${base} needs an _other form`).toHaveProperty(`${base}_other`);
-      }
+      expect(localeFileProblems(locale, messages), `locales/${locale}.json`).toEqual([]);
     }
+  });
+
+  it('accepts locale files that use the plural categories of their language', () => {
+    expect(localeFileProblems('pl', polish)).toEqual([]);
+    expect(localeFileProblems('ar', arabic)).toEqual([]);
+    expect(localeFileProblems('pt_BR', { 'controls.zoomIn': 'Ampliar' })).toEqual([]);
+    expect(localeFileProblems('fr', {})).toEqual([]);
+  });
+
+  it('reports what would break a locale file', () => {
+    expect(localeFileProblems('de', {
+      'controls.zoomInn': 'Näher',
+      'canvas.label': 5,
+      'controls.zoomIn_few': 'Näher',
+      'announce.nodesSelected_few': ':count Knoten',
+      'a11y.nodeLabel': 'Knoten: :lable',
+      'announce.nodesAdded_one': 'Knoten hinzugefügt',
+      'announce.nodesAdded_other': 'Knoten hinzugefügt',
+    })).toEqual([
+      'unknown key controls.zoomInn',
+      'canvas.label must be a string',
+      'unknown key controls.zoomIn_few',
+      'announce.nodesSelected_few: de has no "few" plural category',
+      'a11y.nodeLabel: unknown placeholder :lable',
+      'a11y.nodeLabel: missing placeholder :label',
+      'announce.nodesAdded_other: missing placeholder :count',
+      'announce.nodesSelected needs an _other form',
+    ]);
+    expect(localeFileProblems('german', {})).toEqual(['german is not a locale Intl.PluralRules knows']);
   });
 
   it('groups every key by UI area and ends plural keys with a CLDR category', () => {
@@ -101,6 +184,13 @@ describe('translations', () => {
     expect(createTranslator(polish, 'pl')('announce.nodesSelected', { count: 2 })).toBe('2 węzły');
     expect(createTranslator(polish, 'pl')('announce.nodesSelected', { count: 5 })).toBe('5 węzłów');
     expect(createTranslator(polish, 'pl')('announce.nodesSelected', { count: 22 })).toBe('22 węzły');
+  });
+
+  it('selects all six plural categories for a language that has them', () => {
+    const t = createTranslator(arabic, 'ar');
+    expect([0, 1, 2, 3, 11, 100].map((count) => t('announce.nodesAdded', { count }))).toEqual([
+      'zero form', 'one form', 'dual form', 'few form 3', 'many form 11', 'other form 100',
+    ]);
   });
 
   it('falls back to the _other form when a locale omits a category', () => {
