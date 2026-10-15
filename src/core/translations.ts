@@ -1,15 +1,157 @@
-import englishMessages from '../../locales/en.json';
+import en from '../../locales/en.json';
+
+/**
+ * UI messages of a canvas. Every key is optional; missing keys fall back to
+ * English. Messages are plain text with literal `:placeholder` substitution.
+ * Keys that carry a `:count` exist once per CLDR plural category (`_one`,
+ * `_other`, …) and are selected with the canvas `locale`.
+ */
+export interface FlowTranslations {
+  /** Accessible name of the controls panel. */
+  'controls.label'?: string;
+  /** Tooltip / accessible name of the zoom-in button. */
+  'controls.zoomIn'?: string;
+  /** Tooltip / accessible name of the zoom-out button. */
+  'controls.zoomOut'?: string;
+  /** Tooltip / accessible name of the fit-view button. */
+  'controls.fitView'?: string;
+  /** Tooltip of the interactivity toggle before its state is known. */
+  'controls.toggleInteractive'?: string;
+  /** Tooltip of the interactivity toggle while the canvas is interactive (click locks it). */
+  'controls.lockInteractive'?: string;
+  /** Tooltip of the interactivity toggle while the canvas is locked (click unlocks it). */
+  'controls.unlockInteractive'?: string;
+  /** Tooltip / accessible name of the reset-panels button. */
+  'controls.resetPanels'?: string;
+  /** Tooltip of the fullscreen toggle before its state is known. */
+  'controls.toggleFullscreen'?: string;
+  /** Tooltip of the fullscreen toggle while windowed (click enters fullscreen). */
+  'controls.enterFullscreen'?: string;
+  /** Tooltip of the fullscreen toggle while fullscreen (click exits). */
+  'controls.exitFullscreen'?: string;
+
+  /** Default `aria-label` of the canvas container (overridden by `ariaLabel`). */
+  'canvas.label'?: string;
+  /** Text shown while the canvas initialises (overridden by `loadingText`). */
+  'canvas.loading'?: string;
+  /** Touch hint shown while multi-selection mode is active. */
+  'canvas.selectionMode'?: string;
+
+  /** Accessible name of a node with a label. Placeholder: `:label`. */
+  'a11y.nodeLabel'?: string;
+  /** Accessible name of a node without a label. Placeholder: `:id`. */
+  'a11y.nodeId'?: string;
+  /** Accessible name of an edge with a label. Placeholder: `:label`. */
+  'a11y.edgeLabel'?: string;
+  /** Accessible name of an edge without a label. Placeholders: `:source`, `:target`. */
+  'a11y.edgeEndpoints'?: string;
+  /** Accessible name of a source handle. Placeholder: `:id`. */
+  'a11y.sourceHandle'?: string;
+  /** Accessible name of a target handle. Placeholder: `:id`. */
+  'a11y.targetHandle'?: string;
+  /** Tooltip on an editable edge's midpoint. */
+  'a11y.addControlPoint'?: string;
+
+  /** Announced when one labelled node is added. Placeholder: `:label`. */
+  'announce.nodeAdded'?: string;
+  /** Announced when several nodes are added. Placeholder: `:count` (plural, singular form). */
+  'announce.nodesAdded_one'?: string;
+  /** Announced when several nodes are added. Placeholder: `:count` (plural, default form). */
+  'announce.nodesAdded_other'?: string;
+  /** Announced when one labelled node is removed. Placeholder: `:label`. */
+  'announce.nodeRemoved'?: string;
+  /** Announced when several nodes are removed. Placeholder: `:count` (plural, singular form). */
+  'announce.nodesRemoved_one'?: string;
+  /** Announced when several nodes are removed. Placeholder: `:count` (plural, default form). */
+  'announce.nodesRemoved_other'?: string;
+  /** Announced when one edge is added. Placeholders: `:source`, `:target`. */
+  'announce.connected'?: string;
+  /** Announced when several edges are added. Placeholder: `:count` (plural, singular form). */
+  'announce.connectionsAdded_one'?: string;
+  /** Announced when several edges are added. Placeholder: `:count` (plural, default form). */
+  'announce.connectionsAdded_other'?: string;
+  /** Announced when one edge with known endpoints is removed. Placeholders: `:source`, `:target`. */
+  'announce.disconnected'?: string;
+  /** Announced when edges without known endpoints are removed. Placeholder: `:count` (plural, singular form). */
+  'announce.connectionsRemoved_one'?: string;
+  /** Announced when edges without known endpoints are removed. Placeholder: `:count` (plural, default form). */
+  'announce.connectionsRemoved_other'?: string;
+  /** Announced when the selection becomes empty. */
+  'announce.selectionCleared'?: string;
+  /** Node part of a selection announcement. Placeholder: `:count` (plural, singular form). */
+  'announce.nodesSelected_one'?: string;
+  /** Node part of a selection announcement. Placeholder: `:count` (plural, default form). */
+  'announce.nodesSelected_other'?: string;
+  /** Edge part of a selection announcement. Placeholder: `:count` (plural, singular form). */
+  'announce.edgesSelected_one'?: string;
+  /** Edge part of a selection announcement. Placeholder: `:count` (plural, default form). */
+  'announce.edgesSelected_other'?: string;
+  /** Joins the node and edge parts of a selection announcement. Placeholders: `:nodes`, `:edges`. */
+  'announce.selectionJoin'?: string;
+  /** Wraps the selection summary. Placeholder: `:items`. */
+  'announce.selected'?: string;
+  /** Announced when panning or zooming ends. Placeholder: `:percent`. */
+  'announce.viewportZoom'?: string;
+  /** Announced after fit-view. */
+  'announce.viewFitted'?: string;
+  /** Fallback name for a node without label or id in reparent announcements. */
+  'announce.node'?: string;
+  /** Announced when a node is moved into a parent. Placeholders: `:name`, `:parent`. */
+  'announce.reparented'?: string;
+  /** Announced when a node leaves its parent. Placeholders: `:name`, `:parent`. */
+  'announce.detached'?: string;
+
+  /** Default label of a condition node without `data.label`. */
+  'workflow.condition'?: string;
+  /** Shown instead of an expression when a condition uses a custom evaluator function. */
+  'workflow.customEvaluator'?: string;
+  /** Default label of a wait node without `data.label`. */
+  'workflow.wait'?: string;
+
+  /** Node inspector placeholder while nothing is selected. */
+  'schema.inspector.noNode'?: string;
+  /** Edge inspector placeholder while nothing is selected. */
+  'schema.inspector.noEdge'?: string;
+  /** Row inspector placeholder while nothing is selected. */
+  'schema.inspector.noRow'?: string;
+  /** Row inspector message when the selected row was deleted. */
+  'schema.inspector.missingRow'?: string;
+  /** Form label of the edge label input. */
+  'schema.inspector.label'?: string;
+  /** Form label of the row name input. */
+  'schema.inspector.name'?: string;
+  /** Form label and placeholder of the row type input. */
+  'schema.inspector.type'?: string;
+  /** Form label of the row "required" checkbox. */
+  'schema.inspector.required'?: string;
+  /** Button verb that removes a row. */
+  'schema.inspector.remove'?: string;
+  /** Button verb that deletes the selected edge. */
+  'schema.inspector.delete'?: string;
+  /** Button verb that adds a row. */
+  'schema.inspector.add'?: string;
+  /** Placeholder of the new-row name input. */
+  'schema.inspector.fieldName'?: string;
+}
 
 type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 
-type MessageKey = keyof typeof englishMessages;
+type MessageKey = keyof FlowTranslations;
 
 /** Message keys as callers use them: plural variants collapse onto their base key. */
 export type TranslationKey = MessageKey extends infer K
   ? K extends `${infer Base}_${PluralCategory}` ? Base : K
   : never;
 
-export type FlowTranslations = Partial<typeof englishMessages>;
+/** `A` when it has exactly the keys of `B`, otherwise `never`. */
+type SameKeys<A, B> = [keyof A] extends [keyof B] ? ([keyof B] extends [keyof A] ? A : never) : never;
+
+/**
+ * English defaults. The annotation fails `tsc` when `locales/en.json` and
+ * {@link FlowTranslations} disagree on a key, so the interface stays the single
+ * typed source and the emitted declarations carry no JSON import.
+ */
+const englishMessages: SameKeys<typeof en, Required<FlowTranslations>> = en;
 
 const FALLBACK_LOCALE = 'en';
 const pluralRulesCache = new Map<string, Intl.PluralRules>();
@@ -34,11 +176,12 @@ export function resolvePluralRules(locale?: string): Intl.PluralRules {
 }
 
 function pickMessage(
-  dictionary: Record<string, string | undefined>,
+  translations: FlowTranslations,
   key: string,
   count: number | undefined,
   rules: Intl.PluralRules,
 ): string | undefined {
+  const dictionary = translations as Record<string, string | undefined>;
   if (count === undefined) return dictionary[key];
   return dictionary[`${key}_${rules.select(count)}`] ?? dictionary[`${key}_other`];
 }

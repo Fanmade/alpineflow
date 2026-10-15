@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest';
-import { translate } from './translations';
+import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
+import { translate, type FlowTranslations, type TranslationKey } from './translations';
 import en from '../../locales/en.json';
 import de from '../../locales/de.json';
 import { createControlsPanel } from './controls-panel';
@@ -16,6 +16,16 @@ const polish = {
 describe('translations', () => {
   afterEach(() => {
     document.documentElement.lang = '';
+  });
+
+  it('types FlowTranslations as an explicit interface over the English keys', () => {
+    const overrides: FlowTranslations = { ...en, 'controls.zoomIn': 'Closer' };
+    // @ts-expect-error unknown keys are rejected instead of widening to any
+    const typo: FlowTranslations = { 'controls.zoomInn': 'Closer' };
+    expectTypeOf<keyof FlowTranslations>().toEqualTypeOf<keyof typeof en>();
+    expectTypeOf<'announce.nodesSelected'>().toMatchTypeOf<TranslationKey>();
+    expectTypeOf<'announce.nodesSelected_one'>().not.toMatchTypeOf<TranslationKey>();
+    expect(translate({ ...overrides, ...typo }, 'controls.zoomIn')).toBe('Closer');
   });
 
   it('falls back per dotted key and substitutes values literally in one pass', () => {

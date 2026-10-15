@@ -91,7 +91,8 @@ Alpine.data('germanDiagram', () => ({
 </div>
 ```
 
-`locales/en.json` and the `FlowTranslations` type expose all supported keys.
+The `FlowTranslations` interface lists every key with a short description of
+where it appears; `locales/en.json` holds the English defaults.
 The JSON dictionaries in `locales/` are the single source for engine messages;
 the build copies them to `dist/locales/` for npm and downstream PHP consumers.
 
